@@ -1,9 +1,6 @@
 package ru.yandex.practicum;
 
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.Writer;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -25,11 +22,11 @@ public class Wordle {
     public static void main(String[] args) {
 
         try (FileOutputStream fos = new FileOutputStream(LOGS_FILE_NAME);
-             Writer writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
+             Writer writer = new FileWriter(fos, StandardCharsets.UTF_8)) {
 
             PrintWriter logger = new PrintWriter(writer, true);
 
-            WordleDictionaryLoader wdl = new WordleDictionaryLoader(LOGS_FILE_NAME);
+            WordleDictionaryLoader wdl = new WordleDictionaryLoader(logger);
             WordleDictionary dictionary = wdl.downloadDictionary(DICTIONARY_FILE_NAME);
 
             WordleGame game = new WordleGame(LOGS_FILE_NAME, dictionary);
@@ -37,7 +34,7 @@ public class Wordle {
             starter.start(game);
 
         } catch (Exception exp) {
-            // todo
+            exp.printStackTrace();
         }
 
     }

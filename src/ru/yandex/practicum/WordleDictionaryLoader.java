@@ -1,10 +1,9 @@
 package ru.yandex.practicum;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,10 +13,10 @@ import java.util.List;
     на выходе должен быть класс WordleDictionary
  */
 public class WordleDictionaryLoader {
-    private final String logsFileName;
+    private final PrintWriter logger;
 
-    public WordleDictionaryLoader(String logsFileName) {
-        this.logsFileName = logsFileName;
+    public WordleDictionaryLoader(PrintWriter logger) {
+        this.logger = logger;
     }
 
     public WordleDictionary downloadDictionary(String fileName) {
@@ -28,7 +27,7 @@ public class WordleDictionaryLoader {
                 words.add(br.readLine());
             }
         } catch (IOException exp) {
-            WordleLogging.writeLog(logsFileName, exp);
+            logger.println(exp.getMessage());
         }
 
         return new WordleDictionary(words);
