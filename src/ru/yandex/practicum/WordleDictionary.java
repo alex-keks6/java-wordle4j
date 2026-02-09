@@ -1,5 +1,7 @@
 package ru.yandex.practicum;
 
+import ru.yandex.practicum.exception.WordNotFoundInDictionaryException;
+
 import java.util.List;
 import java.util.Random;
 
@@ -10,10 +12,12 @@ import java.util.Random;
  */
 public class WordleDictionary {
 
-    private List<String> words;
+    private final List<String> words;
+    private final int wordLength;
 
-    public WordleDictionary(List<String> words) {
+    public WordleDictionary(List<String> words, int wordLength) {
         this.words = words;
+        this.wordLength = wordLength;
     }
 
     public String getRandomWord() {
@@ -21,5 +25,13 @@ public class WordleDictionary {
         int indexRandomWord = random.nextInt(words.size());
 
         return words.get(indexRandomWord);
+    }
+
+    public int getWordLength() {
+        return wordLength;
+    }
+
+    public boolean containsWord(String word) {
+        return words.contains(word);
     }
 }

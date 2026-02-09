@@ -1,9 +1,8 @@
 package ru.yandex.practicum;
 
-import java.io.*;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Scanner;
 
 /*
@@ -18,20 +17,20 @@ import java.util.Scanner;
 public class Wordle {
     private static final String LOGS_FILE_NAME = "logs.txt";
     private static final String DICTIONARY_FILE_NAME = "words_ru.txt";
+    private static final int WORD_LENGTH = 5;
+    private static final int STEPS_COUNT = 6;
 
     public static void main(String[] args) {
 
-        try (FileOutputStream fos = new FileOutputStream(LOGS_FILE_NAME);
-             Writer writer = new FileWriter(fos, StandardCharsets.UTF_8)) {
+        try (FileWriter fw = new FileWriter(LOGS_FILE_NAME, StandardCharsets.UTF_8)) {
 
-            PrintWriter logger = new PrintWriter(writer, true);
+            PrintWriter logger = new PrintWriter(fw, true);
 
             WordleDictionaryLoader wdl = new WordleDictionaryLoader(logger);
-            WordleDictionary dictionary = wdl.downloadDictionary(DICTIONARY_FILE_NAME);
+            WordleDictionary dictionary = wdl.downloadDictionary(DICTIONARY_FILE_NAME, WORD_LENGTH);
 
-            WordleGame game = new WordleGame(LOGS_FILE_NAME, dictionary);
-            WordleGameStarter starter = new WordleGameStarter();
-            starter.start(game);
+            WordleGame game = new WordleGame(logger, dictionary, STEPS_COUNT);
+            startGame(game);
 
         } catch (Exception exp) {
             exp.printStackTrace();
@@ -39,13 +38,47 @@ public class Wordle {
 
     }
 
-    public static void playWordleGame(WordleGame game, WordleDictionary dictionary) {
-        String userWord;
+    public static void startGame(WordleGame game) {
+        String word;
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Игра началась! Угадайте загаданное слово");
-        while (true) {
-            System.out.printf("Количество попыток: %d\n", game.);
+
+        System.out.println("ТЕСТ: слово " + game.getAnswer());
+
+        while (game.getStepsCount() > game.getSteps()) {
+            System.out.printf("Осталось попыток: %d\n", (game.getStepsCount() - game.getSteps()));
+            word = scanner.nextLine();
+
+            // проверка на пустую строку и вызов получения слова-подсказки от программы
+            if (word.isEmpty()) {
+                // todo
+            }
+
+            // валидация (есть ли слово в словаре) (возврат boolean)
+            try {
+                game.validateUserWord(word);
+
+                if (game.getAnswer().equals(word)) {
+                    System.out.println("Вы угадали! Победа!");
+                    break;
+                }
+
+                // проверка-сравнение слова пользователя и ответа (возврат подсказки)
+                System.out.println(game.createHint(word));
+
+                // занесение ответа в ответы пользователя
+                game.addNewWord(word);
+
+            } catch (Exception exp) {
+                System.out.println(exp.getMessage());
+            }
+            // изменение шагов
+            game.addStep();
+        }
+
+        if (game.getStepsCount() == game.getSteps()) {
+            System.out.printf("Вы проиграли. Неугаданное слово: %s\n", game.getAnswer());
         }
     }
 

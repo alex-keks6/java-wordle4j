@@ -1,9 +1,10 @@
 package ru.yandex.practicum;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,17 +20,25 @@ public class WordleDictionaryLoader {
         this.logger = logger;
     }
 
-    public WordleDictionary downloadDictionary(String fileName) {
+    public WordleDictionary downloadDictionary(String fileName, int wordLength) {
         List<String> words = new ArrayList<>();
+        String word;
+
+        logger.println("Начата загрузка словаря из файла");
 
         try (BufferedReader br = new BufferedReader(new FileReader(fileName, StandardCharsets.UTF_8))) {
             while (br.ready()) {
-                words.add(br.readLine());
+                word = br.readLine();
+                if (word.length() == wordLength) {
+                    words.add(word);
+                }
             }
         } catch (IOException exp) {
             logger.println(exp.getMessage());
         }
 
-        return new WordleDictionary(words);
+        logger.printf("Загрузка словаря из файла окончена. Загружено %d слов\n", words.size());
+
+        return new WordleDictionary(words, wordLength);
     }
 }
