@@ -52,7 +52,7 @@ public class Wordle {
 
             // проверка на пустую строку и вызов получения слова-подсказки от программы
             if (word.isEmpty()) {
-                // todo
+                game.getProgramWord();
             }
 
             // валидация (есть ли слово в словаре) (возврат boolean)

@@ -21,11 +21,14 @@ import java.util.List;
  */
 public class WordleGame {
     private final PrintWriter logger;
-    private WordleDictionary dictionary;
-    private String answer;
-    private int steps;
-    private List<String> answers;
-    private int stepsCount;
+    private final WordleDictionary dictionary;
+    private final String answer;
+    private final int steps;
+    private final List<String> answers;
+    private final int stepsCount;
+    // нужен список букв, которые уже точно в слове, плюс для некоторых букв угаданных их положение (как?)
+    // на основе этого + использованных игроком слов (их не включать)
+    // выдавать слово и считать его ответом пользователя
 
     public WordleGame(PrintWriter logger, WordleDictionary dictionary, int stepsCount) {
         this.logger = logger;
@@ -45,21 +48,39 @@ public class WordleGame {
     }
 
     public String createHint(String userWord) {
-        StringBuilder hint = new StringBuilder();
+        StringBuilder answerBuilder = new StringBuilder(answer);
+        StringBuilder userWordBuilder = new StringBuilder(userWord);
 
-        for (int i = 0; i < userWord.length(); i++) {
-            if (answer.contains(userWord.substring(i, i + 1))) {
-                if (answer.charAt(i) == userWord.charAt(i)) {
-                    hint.append("+");
-                } else {
-                    hint.append("^");
-                }
-            } else {
-                hint.append("-");
+        // проход для составления +
+        createHintSymbolsCorrect(answerBuilder, userWordBuilder);
+
+        // проход для составления ^
+        createHintSymbolsExist(answerBuilder, userWordBuilder);
+
+        return userWordBuilder.toString();
+    }
+
+    public void createHintSymbolsCorrect(StringBuilder answerBuilder, StringBuilder userWordBuilder) {
+        for (int i = 0; i < userWordBuilder.length(); i++) {
+            if (answerBuilder.charAt(i) == userWordBuilder.charAt(i)) {
+                userWordBuilder.replace(i, i + 1, "+");
+                answerBuilder.replace(i, i + 1, " ");
             }
         }
+    }
 
-        return hint.toString();
+    public void createHintSymbolsExist(StringBuilder answerBuilder, StringBuilder userWordBuilder) {
+        for (int i = 0; i < userWordBuilder.length(); i++) {
+            int answerSymbolIndex = answerBuilder.indexOf(userWordBuilder.substring(i, i + 1));
+            if (answerSymbolIndex != -1) {
+                userWordBuilder.replace(i, i + 1, "^");
+                answerBuilder.replace(answerSymbolIndex, answerSymbolIndex + 1, " ");
+            } else {
+                if (userWordBuilder.charAt(i) != '+') {
+                    userWordBuilder.replace(i, i + 1, "-");
+                }
+            }
+        }
     }
 
     public void validateUserWord(String userWord)
@@ -82,5 +103,9 @@ public class WordleGame {
 
     public String getAnswer() {
         return answer;
+    }
+
+    public String getProgramWord() {
+
     }
 }
