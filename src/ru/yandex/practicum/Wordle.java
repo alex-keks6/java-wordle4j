@@ -46,8 +46,8 @@ public class Wordle {
 
         System.out.println("ТЕСТ: слово " + game.getAnswer());
 
-        while (game.getStepsCount() > game.getSteps()) {
-            System.out.printf("Осталось попыток: %d\n", (game.getStepsCount() - game.getSteps()));
+        while (game.getStepsCount() > 0) {
+            System.out.printf("Осталось попыток: %d\n", (game.getStepsCount()));
             word = scanner.nextLine();
 
             // проверка на пустую строку и вызов получения слова-подсказки от программы
@@ -74,10 +74,10 @@ public class Wordle {
                 System.out.println(exp.getMessage());
             }
             // изменение шагов
-            game.addStep();
+            game.lowerStep();
         }
 
-        if (game.getStepsCount() == game.getSteps()) {
+        if (game.getStepsCount() == 0) {
             System.out.printf("Вы проиграли. Неугаданное слово: %s\n", game.getAnswer());
         }
     }

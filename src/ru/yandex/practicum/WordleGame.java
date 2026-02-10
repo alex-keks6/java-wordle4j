@@ -4,8 +4,7 @@ import ru.yandex.practicum.exception.WordNotFoundInDictionaryException;
 import ru.yandex.practicum.exception.WordNotMatchOnLengthException;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /*
 в этом классе хранится словарь и состояние игры
@@ -23,24 +22,18 @@ public class WordleGame {
     private final PrintWriter logger;
     private final WordleDictionary dictionary;
     private final String answer;
-    private final int steps;
     private final List<String> answers;
-    private final int stepsCount;
-    // нужен список букв, которые уже точно в слове, плюс для некоторых букв угаданных их положение (как?)
-    // на основе этого + использованных игроком слов (их не включать)
-    // выдавать слово и считать его ответом пользователя
+    private int stepsCount;
+    private char[] charAnswerStatus;
 
     public WordleGame(PrintWriter logger, WordleDictionary dictionary, int stepsCount) {
         this.logger = logger;
         this.dictionary = dictionary;
         this.answer = dictionary.getRandomWord();
-        this.steps = 0;
         answers = new ArrayList<>();
         this.stepsCount = stepsCount;
-    }
-
-    public int getSteps() {
-        return steps;
+        charAnswerStatus = new char[answer.length()];
+        Arrays.fill(charAnswerStatus, '-');
     }
 
     public int getStepsCount() {
@@ -93,8 +86,8 @@ public class WordleGame {
         }
     }
 
-    public void addStep() {
-        steps++;
+    public void lowerStep() {
+        stepsCount--;
     }
 
     public void addNewWord(String word) {
@@ -106,6 +99,21 @@ public class WordleGame {
     }
 
     public String getProgramWord() {
+        StringBuilder testWord;
 
+        for (int i = 0; i < dictionary.getDictionarySize(); i++) {
+            testWord = new StringBuilder(dictionary.getDictionaryWord(i));
+            // проверка на использованное уже слово в качестве ответа игрока!
+            // todo
+            //
+            // для каждого слова проходимся по массиву статуса ответа, чтобы отфильтровать
+            // и выбрать нужное слово для подсказки от компьютера
+            // если +, то чтоб на нужной позиции была буква
+            // потом проверять по ^: если есть, то чтоб просто был символ такой
+            // сделать для каждого проверяемого слова сначала его StringBuilder, чтобы плюсы стирать на -, например, в нём
+            // и потом домики независимо проверять, иначе будет неправильно
+        }
     }
+
+    // todo: потом сделать заполнение этих статусов (при каком-либо отгадывании пользователя)!
 }

@@ -3,6 +3,7 @@ package ru.yandex.practicum;
 import ru.yandex.practicum.exception.WordNotFoundInDictionaryException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 /*
@@ -33,5 +34,13 @@ public class WordleDictionary {
 
     public boolean containsWord(String word) {
         return words.contains(word);
+    }
+
+    public int getDictionarySize() {
+        return words.size();
+    }
+
+    public String getDictionaryWord(int index) {
+        return words.get(index);
     }
 }
