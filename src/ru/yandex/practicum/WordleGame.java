@@ -27,7 +27,8 @@ public class WordleGame {
     private char[] charAnswerStatus;
     private final WordleDictionary currentDictionary;
 
-    public WordleGame(PrintWriter logger, WordleDictionary dictionary, int stepsCount, WordleDictionary currentDictionary) {
+    public WordleGame(PrintWriter logger, WordleDictionary dictionary, int stepsCount,
+                      WordleDictionary currentDictionary) {
         this.logger = logger;
         this.dictionary = dictionary;
         this.answer = dictionary.getRandomWord();
@@ -101,13 +102,19 @@ public class WordleGame {
     }
 
     public String getProgramWord() {
+        clearCurrentDictionary();
+        return currentDictionary.getRandomWord();
+    }
+
+    public void clearCurrentDictionary() {
         StringBuilder testWord;
         boolean isRemoveWord;
 
         // удаление неподходящих под текущее положение игры слов
         for (int indexWord = 0; indexWord < currentDictionary.getDictionarySize(); ) {
-            testWord = new StringBuilder(dictionary.getDictionaryWord(indexWord));
-            // проверка на использованное уже слово в качестве ответа игрока!
+            testWord = new StringBuilder(currentDictionary.getDictionaryWord(indexWord));
+
+            // проверка на использованное уже слово в качестве ответа игрока
             if (answers.contains(testWord.toString())) {
                 currentDictionary.removeDictionaryWord(indexWord);
             } else {
@@ -142,12 +149,38 @@ public class WordleGame {
                 }
             }
         }
-
-        // выбор из отфильтрованного словаря подходящего слова
-        return currentDictionary.getRandomWord();
     }
 
-    // todo: потом сделать заполнение этих статусов (при каком-либо отгадывании пользователя или программы)!
-    //  Создавать каждый раз (или передавать) подсказку и на основе неё уже модифицировать
-    //  глобальную подсказку.
+    public void modificateCharAnswerStatus(String word, String hint) {
+        char[] currentCharAnswerStatus = new char[answer.length()];
+        Arrays.fill(currentCharAnswerStatus, '-');
+
+
+        // установка +
+        for (int i = 0; i < hint.length(); i++) {
+            if (hint.charAt(i) == '+') {
+                currentCharAnswerStatus[i] = '+';
+            }
+        }
+
+        // установка ^
+        for (int i = 0; i < hint.length(); i++) {
+            if (hint.charAt(i) == '^') {
+                for (int j = 0; j < answer.length(); j++) {
+                    if (word.charAt(i) == answer.charAt(j) && currentCharAnswerStatus[j] == '-') {
+                        currentCharAnswerStatus[j] = '^';
+                    }
+                }
+            }
+        }
+
+        // объединение текущего ответа с глобальным состоянием слова
+        for (int i = 0; i < charAnswerStatus.length; i++) {
+            if (currentCharAnswerStatus[i] == '+' && charAnswerStatus[i] != '+') {
+                charAnswerStatus[i] = '+';
+            } else if (currentCharAnswerStatus[i] == '^' && charAnswerStatus[i] == '-') {
+                charAnswerStatus[i] = '^';
+            }
+        }
+    }
 }

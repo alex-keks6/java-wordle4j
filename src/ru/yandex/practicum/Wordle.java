@@ -31,7 +31,7 @@ public class Wordle {
             WordleDictionary currentDictionary = wdl.downloadDictionary(DICTIONARY_FILE_NAME, WORD_LENGTH);
 
             WordleGame game = new WordleGame(logger, dictionary, STEPS_COUNT, currentDictionary);
-            startGame(game);
+            startGame(game, logger);
 
         } catch (Exception exp) {
             exp.printStackTrace();
@@ -39,8 +39,11 @@ public class Wordle {
 
     }
 
-    public static void startGame(WordleGame game) {
+    // todo: написать тесты
+
+    public static void startGame(WordleGame game, PrintWriter logger) {
         String word;
+        String hint;
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Игра началась! Угадайте загаданное слово");
@@ -53,10 +56,11 @@ public class Wordle {
 
             // проверка на пустую строку и вызов получения слова-подсказки от программы
             if (word.isEmpty()) {
-                game.getProgramWord();
+                word = game.getProgramWord();
+                System.out.println(word);
             }
 
-            // валидация (есть ли слово в словаре) (возврат boolean)
+            // валидация (есть ли слово в словаре)
             try {
                 game.validateUserWord(word);
 
@@ -66,13 +70,17 @@ public class Wordle {
                 }
 
                 // проверка-сравнение слова пользователя и ответа (возврат подсказки)
-                System.out.println(game.createHint(word));
+                hint = game.createHint(word);
+                System.out.println(hint);
 
                 // занесение ответа в ответы пользователя
                 game.addNewWord(word);
 
+                // модификация глобального состояния загаданного слова
+                game.modificateCharAnswerStatus(word, hint);
+
             } catch (Exception exp) {
-                System.out.println(exp.getMessage());
+                logger.println(exp.getMessage());
             }
             // изменение шагов
             game.lowerStep();

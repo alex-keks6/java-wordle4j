@@ -23,6 +23,7 @@ public class WordleDictionary {
 
     public String getRandomWord() {
         Random random = new Random();
+        System.out.println(words.size());
         int indexRandomWord = random.nextInt(words.size());
 
         return words.get(indexRandomWord);
