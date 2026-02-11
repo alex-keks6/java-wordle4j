@@ -43,4 +43,8 @@ public class WordleDictionary {
     public String getDictionaryWord(int index) {
         return words.get(index);
     }
+
+    public void removeDictionaryWord(int index) {
+        words.remove(index);
+    }
 }

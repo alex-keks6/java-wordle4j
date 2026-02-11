@@ -28,8 +28,9 @@ public class Wordle {
 
             WordleDictionaryLoader wdl = new WordleDictionaryLoader(logger);
             WordleDictionary dictionary = wdl.downloadDictionary(DICTIONARY_FILE_NAME, WORD_LENGTH);
+            WordleDictionary currentDictionary = wdl.downloadDictionary(DICTIONARY_FILE_NAME, WORD_LENGTH);
 
-            WordleGame game = new WordleGame(logger, dictionary, STEPS_COUNT);
+            WordleGame game = new WordleGame(logger, dictionary, STEPS_COUNT, currentDictionary);
             startGame(game);
 
         } catch (Exception exp) {

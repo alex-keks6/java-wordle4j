@@ -25,8 +25,9 @@ public class WordleGame {
     private final List<String> answers;
     private int stepsCount;
     private char[] charAnswerStatus;
+    private final WordleDictionary currentDictionary;
 
-    public WordleGame(PrintWriter logger, WordleDictionary dictionary, int stepsCount) {
+    public WordleGame(PrintWriter logger, WordleDictionary dictionary, int stepsCount, WordleDictionary currentDictionary) {
         this.logger = logger;
         this.dictionary = dictionary;
         this.answer = dictionary.getRandomWord();
@@ -34,6 +35,7 @@ public class WordleGame {
         this.stepsCount = stepsCount;
         charAnswerStatus = new char[answer.length()];
         Arrays.fill(charAnswerStatus, '-');
+        this.currentDictionary = currentDictionary;
     }
 
     public int getStepsCount() {
@@ -57,7 +59,7 @@ public class WordleGame {
         for (int i = 0; i < userWordBuilder.length(); i++) {
             if (answerBuilder.charAt(i) == userWordBuilder.charAt(i)) {
                 userWordBuilder.replace(i, i + 1, "+");
-                answerBuilder.replace(i, i + 1, " ");
+                answerBuilder.replace(i, i + 1, "_");
             }
         }
     }
@@ -67,7 +69,7 @@ public class WordleGame {
             int answerSymbolIndex = answerBuilder.indexOf(userWordBuilder.substring(i, i + 1));
             if (answerSymbolIndex != -1) {
                 userWordBuilder.replace(i, i + 1, "^");
-                answerBuilder.replace(answerSymbolIndex, answerSymbolIndex + 1, " ");
+                answerBuilder.replace(answerSymbolIndex, answerSymbolIndex + 1, "_");
             } else {
                 if (userWordBuilder.charAt(i) != '+') {
                     userWordBuilder.replace(i, i + 1, "-");
@@ -100,20 +102,52 @@ public class WordleGame {
 
     public String getProgramWord() {
         StringBuilder testWord;
+        boolean isRemoveWord;
 
-        for (int i = 0; i < dictionary.getDictionarySize(); i++) {
-            testWord = new StringBuilder(dictionary.getDictionaryWord(i));
+        // удаление неподходящих под текущее положение игры слов
+        for (int indexWord = 0; indexWord < currentDictionary.getDictionarySize(); ) {
+            testWord = new StringBuilder(dictionary.getDictionaryWord(indexWord));
             // проверка на использованное уже слово в качестве ответа игрока!
-            // todo
-            //
-            // для каждого слова проходимся по массиву статуса ответа, чтобы отфильтровать
-            // и выбрать нужное слово для подсказки от компьютера
-            // если +, то чтоб на нужной позиции была буква
-            // потом проверять по ^: если есть, то чтоб просто был символ такой
-            // сделать для каждого проверяемого слова сначала его StringBuilder, чтобы плюсы стирать на -, например, в нём
-            // и потом домики независимо проверять, иначе будет неправильно
+            if (answers.contains(testWord.toString())) {
+                currentDictionary.removeDictionaryWord(indexWord);
+            } else {
+                isRemoveWord = false;
+                for (int indexChar = 0; indexChar < charAnswerStatus.length; indexChar++) {
+                    if (charAnswerStatus[indexChar] == '+') {
+                        if (testWord.charAt(indexChar) != answer.charAt(indexChar)) {
+                            currentDictionary.removeDictionaryWord(indexWord);
+                            isRemoveWord = true;
+                            break;
+                        } else {
+                            testWord.replace(indexChar, indexChar + 1, "+");
+                        }
+                    }
+                }
+                if (!isRemoveWord) {
+                    for (int indexChar = 0; indexChar < charAnswerStatus.length; indexChar++) {
+                        if (charAnswerStatus[indexChar] == '^') {
+                            int testWordSymbolIndex = testWord.indexOf(answer.substring(indexChar, indexChar + 1));
+                            if (testWordSymbolIndex == -1) {
+                                currentDictionary.removeDictionaryWord(indexWord);
+                                isRemoveWord = true;
+                                break;
+                            } else {
+                                testWord.replace(testWordSymbolIndex, testWordSymbolIndex + 1, "^");
+                            }
+                        }
+                    }
+                    if (!isRemoveWord) {
+                        indexWord++;
+                    }
+                }
+            }
         }
+
+        // выбор из отфильтрованного словаря подходящего слова
+        return currentDictionary.getRandomWord();
     }
 
-    // todo: потом сделать заполнение этих статусов (при каком-либо отгадывании пользователя)!
+    // todo: потом сделать заполнение этих статусов (при каком-либо отгадывании пользователя или программы)!
+    //  Создавать каждый раз (или передавать) подсказку и на основе неё уже модифицировать
+    //  глобальную подсказку.
 }
