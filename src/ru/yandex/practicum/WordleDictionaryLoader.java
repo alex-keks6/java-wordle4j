@@ -30,7 +30,7 @@ public class WordleDictionaryLoader {
             while (br.ready()) {
                 word = br.readLine();
                 if (word.length() == wordLength) {
-                    words.add(word);
+                    words.add(word.toLowerCase().replace("ё", "е"));
                 }
             }
         } catch (IOException exp) {

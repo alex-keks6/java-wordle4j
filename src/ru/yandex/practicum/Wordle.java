@@ -31,7 +31,7 @@ public class Wordle {
             WordleDictionary currentDictionary = wdl.downloadDictionary(DICTIONARY_FILE_NAME, WORD_LENGTH);
 
             WordleGame game = new WordleGame(logger, dictionary, STEPS_COUNT, currentDictionary);
-            startGame(game, logger);
+            startGame(game);
 
         } catch (Exception exp) {
             exp.printStackTrace();
@@ -41,14 +41,12 @@ public class Wordle {
 
     // todo: написать тесты
 
-    public static void startGame(WordleGame game, PrintWriter logger) {
+    public static void startGame(WordleGame game) {
         String word;
         String hint;
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Игра началась! Угадайте загаданное слово");
-
-        System.out.println("ТЕСТ: слово " + game.getAnswer());
 
         while (game.getStepsCount() > 0) {
             System.out.printf("Осталось попыток: %d\n", (game.getStepsCount()));
@@ -82,7 +80,7 @@ public class Wordle {
                 game.clearCurrentDictionary();
 
             } catch (Exception exp) {
-                logger.println(exp.getMessage());
+                System.out.println(exp.getMessage());
             }
             // изменение шагов
             game.lowerStep();

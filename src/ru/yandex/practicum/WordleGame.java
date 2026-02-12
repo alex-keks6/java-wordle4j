@@ -21,10 +21,11 @@ import java.util.*;
 public class WordleGame {
     private final PrintWriter logger;
     private final WordleDictionary dictionary;
-    private final String answer;
+    private String answer;
     private int stepsCount;
-    private final char[] charAnswerStatus;
-    private final WordleDictionary currentDictionary;
+    private char[] charAnswerStatus;
+
+    private WordleDictionary currentDictionary;
 
     public WordleGame(PrintWriter logger, WordleDictionary dictionary, int stepsCount,
                       WordleDictionary currentDictionary) {
@@ -45,16 +46,19 @@ public class WordleGame {
         StringBuilder answerBuilder = new StringBuilder(answer);
         StringBuilder userWordBuilder = new StringBuilder(userWord);
 
-        // проход для составления +
-        createHintSymbolsCorrect(answerBuilder, userWordBuilder);
+        // проход для составления '+'
+        createHintSymbolsPlus(answerBuilder, userWordBuilder);
 
-        // проход для составления ^
-        createHintSymbolsExist(answerBuilder, userWordBuilder);
+        // проход для составления '^'
+        createHintSymbolsCaret(answerBuilder, userWordBuilder);
+
+        // замена оставшихся букв на '-' для создания подсказки
+        replaceSymbolsOnDash(userWordBuilder);
 
         return userWordBuilder.toString();
     }
 
-    public void createHintSymbolsCorrect(StringBuilder targetWordBuilder, StringBuilder hintWordBuilder) {
+    public void createHintSymbolsPlus(StringBuilder targetWordBuilder, StringBuilder hintWordBuilder) {
         for (int i = 0; i < hintWordBuilder.length(); i++) {
             if (targetWordBuilder.charAt(i) == hintWordBuilder.charAt(i)) {
                 hintWordBuilder.replace(i, i + 1, "+");
@@ -63,16 +67,20 @@ public class WordleGame {
         }
     }
 
-    public void createHintSymbolsExist(StringBuilder targetWordBuilder, StringBuilder hintWordBuilder) {
+    public void createHintSymbolsCaret(StringBuilder targetWordBuilder, StringBuilder hintWordBuilder) {
         for (int i = 0; i < hintWordBuilder.length(); i++) {
             int answerSymbolIndex = targetWordBuilder.indexOf(hintWordBuilder.substring(i, i + 1));
             if (answerSymbolIndex != -1) {
                 hintWordBuilder.replace(i, i + 1, "^");
                 targetWordBuilder.replace(answerSymbolIndex, answerSymbolIndex + 1, "_");
-            } else {
-                if (hintWordBuilder.charAt(i) != '+') {
-                    hintWordBuilder.replace(i, i + 1, "-");
-                }
+            }
+        }
+    }
+
+    public void replaceSymbolsOnDash(StringBuilder hintWordBuilder) {
+        for (int i = 0; i < hintWordBuilder.length(); i++) {
+            if (hintWordBuilder.charAt(i) != '+' && hintWordBuilder.charAt(i) != '^') {
+                hintWordBuilder.replace(i, i + 1, "-");
             }
         }
     }
@@ -160,10 +168,10 @@ public class WordleGame {
         StringBuilder userWordBuilder = new StringBuilder(word);
 
         // проход для составления +
-        createHintSymbolsCorrect(userWordBuilder, answerBuilder);
+        createHintSymbolsPlus(userWordBuilder, answerBuilder);
 
         // проход для составления ^
-        createHintSymbolsExist(userWordBuilder, answerBuilder);
+        createHintSymbolsCaret(userWordBuilder, answerBuilder);
 
         // объединение текущего ответа с глобальным состоянием слова
         for (int i = 0; i < charAnswerStatus.length; i++) {
@@ -174,4 +182,22 @@ public class WordleGame {
             }
         }
     }
+
+    // методы только для тестов
+    public void setAnswer(String word) {
+        this.answer = word;
+    }
+
+    public void setCurrentDictionary(WordleDictionary currentDictionary) {
+        this.currentDictionary = currentDictionary;
+    }
+
+    public void setCharAnswerStatus(char[] charAnswerStatus) {
+        this.charAnswerStatus = charAnswerStatus;
+    }
+
+    public char[] getCharAnswerStatus() {
+        return charAnswerStatus;
+    }
+
 }

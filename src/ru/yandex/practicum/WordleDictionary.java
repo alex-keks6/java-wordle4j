@@ -12,7 +12,6 @@ import java.util.Random;
     также этот класс может содержать рутинные функции по сравнению слов, букв и т.д.
  */
 public class WordleDictionary {
-
     private final List<String> words;
     private final int wordLength;
 
@@ -23,7 +22,6 @@ public class WordleDictionary {
 
     public String getRandomWord() {
         Random random = new Random();
-        System.out.println(words.size());
         int indexRandomWord = random.nextInt(words.size());
 
         return words.get(indexRandomWord);
