@@ -37,7 +37,7 @@ public class WordleDictionaryLoader {
             logger.println(exp.getMessage());
         }
 
-        logger.printf("Загрузка словаря из файла окончена. Загружено %d слов\n", words.size());
+        logger.printf("Загрузка словаря из файла окончена. Загружено слов: %d\n", words.size());
 
         return new WordleDictionary(words, wordLength);
     }

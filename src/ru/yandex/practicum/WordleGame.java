@@ -22,9 +22,8 @@ public class WordleGame {
     private final PrintWriter logger;
     private final WordleDictionary dictionary;
     private final String answer;
-    private final List<String> answers;
     private int stepsCount;
-    private char[] charAnswerStatus;
+    private final char[] charAnswerStatus;
     private final WordleDictionary currentDictionary;
 
     public WordleGame(PrintWriter logger, WordleDictionary dictionary, int stepsCount,
@@ -32,7 +31,6 @@ public class WordleGame {
         this.logger = logger;
         this.dictionary = dictionary;
         this.answer = dictionary.getRandomWord();
-        answers = new ArrayList<>();
         this.stepsCount = stepsCount;
         charAnswerStatus = new char[answer.length()];
         Arrays.fill(charAnswerStatus, '-');
@@ -56,24 +54,24 @@ public class WordleGame {
         return userWordBuilder.toString();
     }
 
-    public void createHintSymbolsCorrect(StringBuilder answerBuilder, StringBuilder userWordBuilder) {
-        for (int i = 0; i < userWordBuilder.length(); i++) {
-            if (answerBuilder.charAt(i) == userWordBuilder.charAt(i)) {
-                userWordBuilder.replace(i, i + 1, "+");
-                answerBuilder.replace(i, i + 1, "_");
+    public void createHintSymbolsCorrect(StringBuilder targetWordBuilder, StringBuilder hintWordBuilder) {
+        for (int i = 0; i < hintWordBuilder.length(); i++) {
+            if (targetWordBuilder.charAt(i) == hintWordBuilder.charAt(i)) {
+                hintWordBuilder.replace(i, i + 1, "+");
+                targetWordBuilder.replace(i, i + 1, "_");
             }
         }
     }
 
-    public void createHintSymbolsExist(StringBuilder answerBuilder, StringBuilder userWordBuilder) {
-        for (int i = 0; i < userWordBuilder.length(); i++) {
-            int answerSymbolIndex = answerBuilder.indexOf(userWordBuilder.substring(i, i + 1));
+    public void createHintSymbolsExist(StringBuilder targetWordBuilder, StringBuilder hintWordBuilder) {
+        for (int i = 0; i < hintWordBuilder.length(); i++) {
+            int answerSymbolIndex = targetWordBuilder.indexOf(hintWordBuilder.substring(i, i + 1));
             if (answerSymbolIndex != -1) {
-                userWordBuilder.replace(i, i + 1, "^");
-                answerBuilder.replace(answerSymbolIndex, answerSymbolIndex + 1, "_");
+                hintWordBuilder.replace(i, i + 1, "^");
+                targetWordBuilder.replace(answerSymbolIndex, answerSymbolIndex + 1, "_");
             } else {
-                if (userWordBuilder.charAt(i) != '+') {
-                    userWordBuilder.replace(i, i + 1, "-");
+                if (hintWordBuilder.charAt(i) != '+') {
+                    hintWordBuilder.replace(i, i + 1, "-");
                 }
             }
         }
@@ -93,8 +91,8 @@ public class WordleGame {
         stepsCount--;
     }
 
-    public void addNewWord(String word) {
-        answers.add(word);
+    public void removeWordFromCurrentDictionary(String word) {
+        currentDictionary.removeDictionaryWord(word);
     }
 
     public String getAnswer() {
@@ -102,7 +100,6 @@ public class WordleGame {
     }
 
     public String getProgramWord() {
-        clearCurrentDictionary();
         return currentDictionary.getRandomWord();
     }
 
@@ -110,75 +107,69 @@ public class WordleGame {
         StringBuilder testWord;
         boolean isRemoveWord;
 
+        logger.println("Начато удаление неподходящих слов из словаря для подсказок");
+
         // удаление неподходящих под текущее положение игры слов
         for (int indexWord = 0; indexWord < currentDictionary.getDictionarySize(); ) {
             testWord = new StringBuilder(currentDictionary.getDictionaryWord(indexWord));
+            isRemoveWord = false;
 
-            // проверка на использованное уже слово в качестве ответа игрока
-            if (answers.contains(testWord.toString())) {
-                currentDictionary.removeDictionaryWord(indexWord);
-            } else {
-                isRemoveWord = false;
+            // проверка по +
+            for (int indexChar = 0; indexChar < charAnswerStatus.length; indexChar++) {
+                if (charAnswerStatus[indexChar] == '+') {
+                    if (testWord.charAt(indexChar) != answer.charAt(indexChar)) {
+                        currentDictionary.removeDictionaryWord(indexWord);
+                        isRemoveWord = true;
+                        break;
+                    } else {
+                        testWord.replace(indexChar, indexChar + 1, "+");
+                    }
+                }
+            }
+
+            // если проверка пройдена и слово не удалено, то проверка по ^
+            if (!isRemoveWord) {
                 for (int indexChar = 0; indexChar < charAnswerStatus.length; indexChar++) {
-                    if (charAnswerStatus[indexChar] == '+') {
-                        if (testWord.charAt(indexChar) != answer.charAt(indexChar)) {
+                    if (charAnswerStatus[indexChar] == '^') {
+                        int testWordSymbolIndex = testWord.indexOf(answer.substring(indexChar, indexChar + 1));
+                        if (testWordSymbolIndex == -1) {
                             currentDictionary.removeDictionaryWord(indexWord);
                             isRemoveWord = true;
                             break;
                         } else {
-                            testWord.replace(indexChar, indexChar + 1, "+");
+                            testWord.replace(testWordSymbolIndex, testWordSymbolIndex + 1, "^");
                         }
                     }
                 }
+
+                // увеличение индекса в случае подходящего слова
                 if (!isRemoveWord) {
-                    for (int indexChar = 0; indexChar < charAnswerStatus.length; indexChar++) {
-                        if (charAnswerStatus[indexChar] == '^') {
-                            int testWordSymbolIndex = testWord.indexOf(answer.substring(indexChar, indexChar + 1));
-                            if (testWordSymbolIndex == -1) {
-                                currentDictionary.removeDictionaryWord(indexWord);
-                                isRemoveWord = true;
-                                break;
-                            } else {
-                                testWord.replace(testWordSymbolIndex, testWordSymbolIndex + 1, "^");
-                            }
-                        }
-                    }
-                    if (!isRemoveWord) {
-                        indexWord++;
-                    }
+                    indexWord++;
                 }
             }
         }
+
+        logger.printf("Удаление неподходящих слов из словаря для подсказок окончено. Осталось слов: %d\n",
+                currentDictionary.getDictionarySize());
+
     }
 
-    public void modificateCharAnswerStatus(String word, String hint) {
-        char[] currentCharAnswerStatus = new char[answer.length()];
-        Arrays.fill(currentCharAnswerStatus, '-');
+    public void modificateCharAnswerStatus(String word) {
+        // текущий статус ответа будет в answerBuilder
+        StringBuilder answerBuilder = new StringBuilder(answer);
+        StringBuilder userWordBuilder = new StringBuilder(word);
 
+        // проход для составления +
+        createHintSymbolsCorrect(userWordBuilder, answerBuilder);
 
-        // установка +
-        for (int i = 0; i < hint.length(); i++) {
-            if (hint.charAt(i) == '+') {
-                currentCharAnswerStatus[i] = '+';
-            }
-        }
-
-        // установка ^
-        for (int i = 0; i < hint.length(); i++) {
-            if (hint.charAt(i) == '^') {
-                for (int j = 0; j < answer.length(); j++) {
-                    if (word.charAt(i) == answer.charAt(j) && currentCharAnswerStatus[j] == '-') {
-                        currentCharAnswerStatus[j] = '^';
-                    }
-                }
-            }
-        }
+        // проход для составления ^
+        createHintSymbolsExist(userWordBuilder, answerBuilder);
 
         // объединение текущего ответа с глобальным состоянием слова
         for (int i = 0; i < charAnswerStatus.length; i++) {
-            if (currentCharAnswerStatus[i] == '+' && charAnswerStatus[i] != '+') {
+            if (answerBuilder.charAt(i) == '+' && charAnswerStatus[i] != '+') {
                 charAnswerStatus[i] = '+';
-            } else if (currentCharAnswerStatus[i] == '^' && charAnswerStatus[i] == '-') {
+            } else if (answerBuilder.charAt(i) == '^' && charAnswerStatus[i] == '-') {
                 charAnswerStatus[i] = '^';
             }
         }

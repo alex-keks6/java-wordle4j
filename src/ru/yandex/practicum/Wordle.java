@@ -60,9 +60,11 @@ public class Wordle {
                 System.out.println(word);
             }
 
-            // валидация (есть ли слово в словаре)
             try {
                 game.validateUserWord(word);
+
+                // удаление слова из текущего словаря для подсказок
+                game.removeWordFromCurrentDictionary(word);
 
                 if (game.getAnswer().equals(word)) {
                     System.out.println("Вы угадали! Победа!");
@@ -73,11 +75,11 @@ public class Wordle {
                 hint = game.createHint(word);
                 System.out.println(hint);
 
-                // занесение ответа в ответы пользователя
-                game.addNewWord(word);
-
                 // модификация глобального состояния загаданного слова
-                game.modificateCharAnswerStatus(word, hint);
+                game.modificateCharAnswerStatus(word);
+
+                // очистка текущего словаря для подсказок
+                game.clearCurrentDictionary();
 
             } catch (Exception exp) {
                 logger.println(exp.getMessage());
