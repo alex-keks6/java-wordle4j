@@ -1,9 +1,6 @@
 package ru.yandex.practicum;
 
-import ru.yandex.practicum.exception.WordNotFoundInDictionaryException;
-
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 /*
