@@ -3,7 +3,6 @@ package ru.yandex.practicum;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.exception.WordNotMatchOnLengthException;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
